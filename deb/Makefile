@@ -11,12 +11,14 @@
 JOBS=$(shell nproc)
 ZLIB_VER=1.3
 PCRE_VER=8.45
+TONGSUO_VAR=8.4.0
+TONGSUO_URL=https://github.com/Tongsuo-Project/Tongsuo/archive/refs/tags/${TONGSUO_VAR}.tar.gz
 SSL_VER=1.1.0l
 SSL111_VER=1.1.1w
 OR_VER=1.25.3.1
 LEMPLATE_VER=0.15
 TEST_NGINX_VER=0.29
-OPTS=
+OPTS= -us -uc
 DISTRO:=$(shell lsb_release -c|awk '{print $$2}')
 deb_toolchain_pkgs = debhelper devscripts
 
@@ -94,7 +96,7 @@ pcre-clean:
 .PHONY: openssl-download
 openssl-download:
 	rm -f *.orig.tar.*
-	wget -nH --cut-dirs=100 --mirror 'https://www.openssl.org/source/openssl-$(SSL_VER).tar.gz'
+	wget -nH --cut-dirs=100 --mirror '${TONGSUO_URL}' -O openssl-$(SSL_VER).tar.gz
 	cp openssl-$(SSL_VER).tar.gz openresty-openssl_$(SSL_VER).orig.tar.gz
 
 .PHONY: openresty-openssl-build
@@ -205,11 +207,14 @@ openresty-download:
 	rm -f *.orig.tar.*
 	wget -nH --cut-dirs=100 --mirror 'https://openresty.org/download/openresty-$(OR_VER).tar.gz'
 	cp openresty-$(OR_VER).tar.gz openresty_$(OR_VER).orig.tar.gz
+	git clone --recurse-submodules https://github.com/wargio/naxsi.git
+	git clone --recurse-submodules -j8 https://github.com/google/ngx_brotli.git
 
 .PHONY: openresty-build
 openresty-build: | openresty-clean openresty-download
-	sudo apt-get -y -qq install openresty-zlib-dev openresty-pcre-dev openresty-openssl111-dev systemtap-sdt-dev $(deb_toolchain_pkgs)
-	sudo apt-get -y -qq --only-upgrade install openresty-zlib-dev openresty-pcre-dev openresty-openssl111-dev systemtap-sdt-dev $(deb_toolchain_pkgs)
+	cd ngx_brotli/deps/brotli && mkdir out && cd out && cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF -DCMAKE_C_FLAGS="-Ofast -m64 -march=native -mtune=native -flto -funroll-loops -ffunction-sections -fdata-sections -Wl,--gc-sections" -DCMAKE_CXX_FLAGS="-Ofast -m64 -march=native -mtune=native -flto -funroll-loops -ffunction-sections -fdata-sections -Wl,--gc-sections" -DCMAKE_INSTALL_PREFIX=./installed .. && cmake --build . --config Release --target brotlienc && cd ../../../..
+	sudo apt-get -y -qq install openresty-zlib-dev openresty-pcre-dev openresty-openssl-dev systemtap-sdt-dev $(deb_toolchain_pkgs)
+	sudo apt-get -y -qq --only-upgrade install openresty-zlib-dev openresty-pcre-dev openresty-openssl-dev systemtap-sdt-dev $(deb_toolchain_pkgs)
 	rm -f *.deb *.debian.tar.xz *.dsc *.changes
 	tar xf openresty_$(OR_VER).orig.tar.gz --strip-components=1 -C openresty
 	cd openresty \
@@ -224,6 +229,9 @@ openresty-clean:
 	find openresty -maxdepth 1 ! -name 'debian' ! -name 'openresty' -print | xargs rm -rf
 	rm -f openresty*.deb
 	rm -f openresty_*.*
+	rm -rf naxsi
+	rm -rf ngx_brotli
+
 
 .PHONY: openresty-debug-download
 openresty-debug-download:
