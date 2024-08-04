@@ -11,8 +11,9 @@
 JOBS=$(shell nproc)
 ZLIB_VER=1.3
 PCRE_VER=8.45
-TONGSUO_VAR=8.4.0
-TONGSUO_URL=https://github.com/Tongsuo-Project/Tongsuo/archive/refs/tags/${TONGSUO_VAR}.tar.gz
+#TONGSUO_VAR=8.4.0
+#TONGSUO_URL=https://github.com/Tongsuo-Project/Tongsuo/archive/refs/tags/${TONGSUO_VAR}.tar.gz
+TONGSUO_URL=https://github.com/Tongsuo-Project/Tongsuo/archive/refs/heads/master.tar.gz
 SSL_VER=1.1.0l
 SSL111_VER=1.1.1w
 OR_VER=1.25.3.1
