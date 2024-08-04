@@ -1,6 +1,6 @@
 FROM debian:bookworm-slim AS builder
 WORKDIR /opt/openresty
-RUN apt update && apt -y install sudo cmake wget perl gnupg curl make build-essential
+RUN apt update && apt -y install sudo cmake wget perl gnupg curl make build-essential git lsb-release
 RUN apt install -y --no-install-recommends --no-install-suggests dh-make bzr-builddeb debhelper systemtap-sdt-dev libtemplate-perl
 RUN git clone https://github.com/ZanyRain/openresty-packaging.git && mkdir dist
 RUN cd openresty-packaging/deb/ && make zlib-build
@@ -9,9 +9,6 @@ RUN cd openresty-packaging/deb/ && make pcre-build
 RUN cd openresty-packaging/deb/ && apt install ./*.deb && mv ./*.deb /opt/openresty/dist/
 RUN cd openresty-packaging/deb/ && make openssl-build
 RUN cd openresty-packaging/deb/ && apt install ./*.deb && mv ./*.deb /opt/openresty/dist/
-ENV OPENSSL_PATH=/usr/local/openresty/openssl
-ENV LD_LIBRARY_PATH=$OPENSSL_PATH/lib:$LD_LIBRARY_PATH
-ENV PATH=$OPENSSL_PATH/bin:$PATH
 RUN cd openresty-packaging/deb/ && make openresty-build
 RUN cd openresty-packaging/deb/ && apt install ./*.deb && mv ./*.deb /opt/openresty/dist/
 

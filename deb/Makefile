@@ -217,6 +217,9 @@ openresty-build: | openresty-clean openresty-download
 	sudo apt-get -y -qq --only-upgrade install openresty-zlib-dev openresty-pcre-dev openresty-openssl-dev systemtap-sdt-dev $(deb_toolchain_pkgs)
 	rm -f *.deb *.debian.tar.xz *.dsc *.changes
 	tar xf openresty_$(OR_VER).orig.tar.gz --strip-components=1 -C openresty
+	export OPENSSL_PATH=/usr/local/openresty/openssl
+	export LD_LIBRARY_PATH=$OPENSSL_PATH/lib:$LD_LIBRARY_PATH
+	export PATH=$OPENSSL_PATH/bin:$PATH
 	cd openresty \
 		&& tpage --define distro=$(DISTRO) debian/changelog.tt2 > debian/changelog \
 		&& debuild --no-lintian $(OPTS) -j$(JOBS)
