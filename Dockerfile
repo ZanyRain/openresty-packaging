@@ -25,9 +25,14 @@ RUN DEBIAN_FRONTEND=noninteractive apt update \
     && ln -sf /dev/stderr /usr/local/openresty/nginx/logs/error.log \
     && mkdir -p /usr/local/openresty/nginx/conf/ \
     && mkdir -p /etc/nginx/conf.d/ \
-    && wget -O /usr/local/openresty/nginx/conf/nginx.conf https://raw.githubusercontent.com/openresty/docker-openresty/master/nginx.conf \
-    && wget -O /etc/nginx/conf.d/default.conf https://raw.githubusercontent.com/openresty/docker-openresty/master/nginx.vh.default.conf
+    && mkdir -p /etc/nginx/sites-enabled/ \
+    && mkdir -p /etc/nginx/ssl/ \
+    && mkdir -p /etc/nginx/common/
 
+COPY conf/nginx.conf /usr/local/openresty/nginx/conf/nginx.conf
+COPY conf/general.conf /etc/nginx/common/general.conf
+COPY conf/proxy.conf /etc/nginx/common/proxy.conf
+COPY conf/security.conf /etc/nginx/common/security.conf
 # Add additional binaries into PATH for convenience
 ENV PATH="$PATH:/usr/local/openresty/luajit/bin:/usr/local/openresty/nginx/sbin:/usr/local/openresty/bin"
 CMD ["/usr/bin/openresty", "-g", "daemon off;"]
